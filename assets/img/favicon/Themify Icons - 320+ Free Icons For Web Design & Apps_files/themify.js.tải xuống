@@ -1,0 +1,72 @@
+( function( $ ) {
+	$body = $( 'body' );
+
+	$( window ).load(function(){
+		// Blog Category
+		if ( $('.blog-category').length ) {
+			$('.blog-category ul li').each(function(){
+				$(this).prepend('<span />');
+			});
+		}
+
+		// Docs
+		var docsNav = '';
+		$('#content .docs h3').each(function(){
+			var anchorId = $(this).prop('id'),
+				title = $(this).text();
+			if ( '' !== anchorId ) {
+				docsNav += '<li><a href="#'+ anchorId +'">' + title + '</a></li>';
+			}
+		});
+		if ( docsNav.length > 0 ) {
+  			$('#sidebar .sidebar-inner').html( '<ol class="toc">' + docsNav + '</ol>' );
+
+  			// Apply nicescroll to desktop
+  			if ( !themifyScript.is_mobile && 'undefined' !== typeof $.fn.niceScroll ) {
+	  			$('#sidebar .sidebar-inner').niceScroll(); // apply nice scroll
+
+				var didScroll = false;
+	  			$(window).on('scroll', function(){
+	  				didScroll = true;
+	  			});
+	  			setInterval(function(){
+	  				if ( didScroll ) {
+	  					didScroll = false;
+	  					$('#sidebar .sidebar-inner .toc').getNiceScroll().resize();
+	  				}
+	  			}, 500);
+  			}
+		}
+
+		/* loader animation for when Reply form in the forum is submitted */
+		$( '#new-post' ).on( 'submit', function(e) {
+			if ( $( '#bbp_reply_content' ).val() === '' && ( $( '#private-data' ).val() === '' || $( '#private-data' ).val() === 'Private Message' ) ) {
+				e.preventDefault();
+				return false;
+			}
+			$( this ).addClass( 'busy' ).prepend( '<div class="alert"></div>' );
+		} );
+
+		// remove the Reply To select field, required
+		$( '.bbp-form .form-reply-to' ).remove();
+
+
+		// bbPress forum search functionality
+		$('#bbp_search_forum_id').change(function(){
+			var val = $(this).val();
+			if( '' == val ) {
+				$( this ).closest( 'form' ).find( '[name="bbp_search_forum_id"]' ).remove().end().append( '<input type="hidden" name="action" value="bbp-search-request" />' );
+			} else {
+				$( this ).closest( 'form' ).find('[value="bbp-search-request"]').remove().end().append( '<input class="button" type="hidden" name="bbp_search_forum_id" value="' + val + '" />' );
+			}
+		});
+
+		// open external links in new window in bbpress
+		$('.bbp-reply-content a').each(function(){
+			if( $(this).attr('href') && 0 != $(this).attr('href').indexOf('#') ) {
+				$(this).attr('target', '_blank');
+			}
+		});
+
+	} );
+} )( jQuery );
